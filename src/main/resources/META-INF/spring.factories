@@ -1,2 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  
+com.uber.cadence.client.starter.config.CadenceBootstrapConfiguration,\
+com.uber.cadence.client.starter.RegisterDomain,\
+com.uber.cadence.client.starter.WorkerStarter

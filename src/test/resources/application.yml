@@ -1,0 +1,12 @@
+spring.cadence:
+  host: localhost
+  port: 7933
+  domain: sample
+  alwaysSave: false
+  workflows:
+    one:
+      tasklist: one
+      executiontimeout: 1000
+    two:
+      tasklist: two
+      executiontimeout: 10000
