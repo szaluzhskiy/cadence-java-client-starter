@@ -1,10 +1,14 @@
 package com.uber.cadence.client.starter.processors;
 
-import com.uber.cadence.client.starter.WorkflowWorkerRegistry;
 import com.uber.cadence.client.starter.annotations.Workflow;
+import com.uber.cadence.client.starter.config.CadenceProperties;
+import com.uber.cadence.client.starter.config.CadenceProperties.WorkflowOption;
+import com.uber.cadence.worker.Worker;
+import com.uber.cadence.worker.WorkerOptions;
 import com.uber.cadence.workflow.WorkflowMethod;
 import java.lang.reflect.Method;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
@@ -13,18 +17,22 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
 @Slf4j
+@Configuration
+@RequiredArgsConstructor
 public class WorkflowAnnotationBeanPostProcessor
     implements BeanPostProcessor, Ordered, BeanFactoryAware, SmartInitializingSingleton {
 
-  private BeanFactory beanFactory;
+  private final CadenceProperties cadenceProperties;
+  private final Worker.Factory workerFactory;
 
-  private WorkflowWorkerRegistry workflowWorkerRegistry = new WorkflowWorkerRegistry();
+  private BeanFactory beanFactory;
 
   @Override
   public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -48,8 +56,10 @@ public class WorkflowAnnotationBeanPostProcessor
             AnnotationUtils.findAnnotation(method, WorkflowMethod.class) != null);
 
     if (methods.isEmpty()) {
+
       log.info("No @WorkflowMethod found on bean {}", bean.getClass());
       return bean;
+
     } else {
 
       // create and reg proxy
@@ -58,11 +68,23 @@ public class WorkflowAnnotationBeanPostProcessor
 
       // create method proxy interceptor if it is planned to be used as a regular bean invocation
       // proxyFactory.addAdvice(...); - see MethodInterceptor
+      WorkflowOption workflowOption = cadenceProperties.getWorkflows().get(workflow.value());
 
-      workflowWorkerRegistry.put(workflow.value(), proxyFactory.getProxy());
+      Worker worker = workerFactory
+          .newWorker(workflowOption.getTaskList(), getWorkerOptions(workflowOption));
+
+      worker.registerWorkflowImplementationTypes(proxyFactory.getProxy().getClass());
     }
     return bean;
   }
+
+  private WorkerOptions getWorkerOptions(WorkflowOption option) {
+    return new WorkerOptions.Builder()
+        .setMaxConcurrentActivityExecutionSize(option.getActivityPoolSize())
+        .setMaxConcurrentWorkflowExecutionSize(option.getWorkflowPoolSize())
+        .build();
+  }
+
 
   @Override
   public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -71,8 +93,7 @@ public class WorkflowAnnotationBeanPostProcessor
 
   @Override
   public void afterSingletonsInstantiated() {
-    workflowWorkerRegistry.setBeanFactory(beanFactory);
-    workflowWorkerRegistry.afterPropertiesSet();
+    workerFactory.start();
   }
 
   @Override

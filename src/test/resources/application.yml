@@ -7,6 +7,10 @@ spring.cadence:
     one:
       tasklist: one
       executiontimeout: 1000
+      activityPoolSize: 100
+      workflowPoolSize: 50
     two:
       tasklist: two
       executiontimeout: 10000
+      activityPoolSize: 100
+      workflowPoolSize: 50
