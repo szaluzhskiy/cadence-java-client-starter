@@ -3,6 +3,7 @@ package com.uber.cadence.client.starter.config;
 import com.uber.cadence.client.WorkflowClient;
 import com.uber.cadence.client.starter.RegisterDomain;
 import com.uber.cadence.client.starter.annotations.EnableCadence;
+import com.uber.cadence.client.starter.config.CadenceProperties.WorkflowOption;
 import com.uber.cadence.client.starter.processors.WorkflowAnnotationBeanPostProcessor;
 import com.uber.cadence.worker.Worker;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 public class CadenceBootstrapConfiguration {
 
   private final CadenceProperties cadenceProperties;
+  private final Worker.Factory workerFactory;
 
-/*  @Bean
+  @Bean
   public Worker.Factory defaultWorkerFactory(CadenceProperties cadenceProperties) {
     return new Worker.Factory(cadenceProperties.getHost(),
         cadenceProperties.getPort(), cadenceProperties.getDomain());
@@ -31,7 +33,9 @@ public class CadenceBootstrapConfiguration {
   public WorkflowClient defaultClient(CadenceProperties cadenceProperties) {
     return WorkflowClient.newInstance(
         cadenceProperties.getHost(), cadenceProperties.getPort(), cadenceProperties.getDomain());
-  }*/
+  }
 
+  public void registrerWorkers() {
 
+  }
 }

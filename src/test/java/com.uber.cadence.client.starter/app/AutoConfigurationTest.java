@@ -2,6 +2,7 @@ package com.uber.cadence.client.starter.app;
 
 
 import com.uber.cadence.client.WorkflowClient;
+import com.uber.cadence.client.starter.annotations.EnableCadence;
 import com.uber.cadence.client.starter.app.workflow.HelloWorkflow;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,17 +12,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
+@EnableCadence
 public class AutoConfigurationTest {
 
   @Autowired
-  WorkflowClient workflowClient;
+  HelloWorkflow workflow;
 
 
   @Test
   public void contextLoads() {
-    HelloWorkflow workflow = workflowClient
-        .newWorkflowStub(HelloWorkflow.class);
-
     workflow.process();
 
   }

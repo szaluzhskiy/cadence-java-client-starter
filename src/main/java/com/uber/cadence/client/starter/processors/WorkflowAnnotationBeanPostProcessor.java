@@ -73,10 +73,9 @@ public class WorkflowAnnotationBeanPostProcessor
       // proxyFactory.addAdvice(...); - see MethodInterceptor
     WorkflowOption workflowOption = cadenceProperties.getWorkflows().get(workflow.value());
 
-      Worker worker = workerFactory
-          .newWorker(workflowOption.getTaskList(), getWorkerOptions(workflowOption));
 
-      worker.registerWorkflowImplementationTypes(proxyFactory.getProxy().getClass());
+
+      //worker.registerWorkflowImplementationTypes(proxyFactory.getProxy().getClass());
     }
     return bean;
   }

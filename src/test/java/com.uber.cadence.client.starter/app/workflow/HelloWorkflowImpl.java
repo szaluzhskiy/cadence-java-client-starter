@@ -17,9 +17,8 @@ public class HelloWorkflowImpl implements HelloWorkflow, TargetSource {
 
   @Override
   public void process() {
-    System.out.println(
-        "Hello from " + this.getClass() + " including " + simpleService.getClass()
-    );
+    System.out.println("!!! Hello from " + this.getClass() + " including " + simpleService.getClass());
+    System.out.println(simpleService.foo("called from HelloWorkflowImpl"));
   }
 
   @Override
