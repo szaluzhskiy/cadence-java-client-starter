@@ -1,7 +1,7 @@
 package com.uber.cadence.client.starter.app;
 
 
-import com.uber.cadence.client.WorkflowClient;
+import com.uber.cadence.client.starter.WorkflowFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +13,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AutoConfigurationTest {
 
   @Autowired
-  WorkflowClient workflowClient;
-
+  WorkflowFactory<HelloWorkflow, HelloWorkflowImpl> factory;
+  @Autowired
+  WorkflowFactory<HelloWorkflow, HelloWorkflowImplTwo> factoryTwo;
 
   @Test
   public void contextLoads() {
-    HelloWorkflow workflow = workflowClient
-        .newWorkflowStub(HelloWorkflow.class);
 
-    workflow.process();
+    factory.next().process();
 
   }
 }

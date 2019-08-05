@@ -1,5 +1,7 @@
 package com.uber.cadence.client.starter.processors;
 
+import com.uber.cadence.client.WorkflowClient;
+import com.uber.cadence.client.starter.WorkflowFactory;
 import com.uber.cadence.client.starter.annotations.Workflow;
 import com.uber.cadence.client.starter.config.CadenceProperties;
 import com.uber.cadence.client.starter.config.CadenceProperties.WorkflowOption;
@@ -17,9 +19,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -29,6 +34,7 @@ import org.springframework.util.ReflectionUtils;
 public class WorkflowAnnotationBeanPostProcessor
     implements BeanPostProcessor, Ordered, BeanFactoryAware, SmartInitializingSingleton {
 
+  private final WorkflowClient workflowClient;
   private final CadenceProperties cadenceProperties;
   private final Worker.Factory workerFactory;
 
@@ -62,18 +68,28 @@ public class WorkflowAnnotationBeanPostProcessor
 
     } else {
 
-      // create and reg proxy
+      // Регистрируем воркера с имплементацией
 
-      ProxyFactory proxyFactory = new ProxyFactory(bean);
-
-      // create method proxy interceptor if it is planned to be used as a regular bean invocation
-      // proxyFactory.addAdvice(...); - see MethodInterceptor
       WorkflowOption workflowOption = cadenceProperties.getWorkflows().get(workflow.value());
 
       Worker worker = workerFactory
           .newWorker(workflowOption.getTaskList(), getWorkerOptions(workflowOption));
 
-      worker.registerWorkflowImplementationTypes(proxyFactory.getProxy().getClass());
+      worker.registerWorkflowImplementationTypes(bean.getClass());
+
+      // Добавляем в контекст фэктори с нужными тайп параметрами
+
+      RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(
+          WorkflowFactory.class,
+          () -> new WorkflowFactory<>(workflowClient, workflowOption, workflow.value(), targetClass.getInterfaces()[0])
+      );
+
+      rootBeanDefinition.setTargetType(
+          ResolvableType.forClassWithGenerics(WorkflowFactory.class, targetClass.getInterfaces()[0], targetClass)
+      );
+
+      ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition(workflow.value(), rootBeanDefinition);
+
     }
     return bean;
   }
