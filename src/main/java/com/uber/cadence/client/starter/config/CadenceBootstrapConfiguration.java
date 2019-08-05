@@ -21,7 +21,7 @@ public class CadenceBootstrapConfiguration {
 
   private final CadenceProperties cadenceProperties;
 
-  @Bean
+/*  @Bean
   public Worker.Factory defaultWorkerFactory(CadenceProperties cadenceProperties) {
     return new Worker.Factory(cadenceProperties.getHost(),
         cadenceProperties.getPort(), cadenceProperties.getDomain());
@@ -31,7 +31,7 @@ public class CadenceBootstrapConfiguration {
   public WorkflowClient defaultClient(CadenceProperties cadenceProperties) {
     return WorkflowClient.newInstance(
         cadenceProperties.getHost(), cadenceProperties.getPort(), cadenceProperties.getDomain());
-  }
+  }*/
 
 
 }

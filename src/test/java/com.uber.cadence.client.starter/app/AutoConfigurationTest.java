@@ -2,6 +2,7 @@ package com.uber.cadence.client.starter.app;
 
 
 import com.uber.cadence.client.WorkflowClient;
+import com.uber.cadence.client.starter.app.workflow.HelloWorkflow;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

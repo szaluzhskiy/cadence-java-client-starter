@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -64,11 +65,13 @@ public class WorkflowAnnotationBeanPostProcessor
 
       // create and reg proxy
 
-      ProxyFactory proxyFactory = new ProxyFactory(bean);
+
+      ProxyFactory proxyFactory = new ProxyFactory((Class) bean.getClass().getGenericInterfaces()[0], (TargetSource) bean);
+
 
       // create method proxy interceptor if it is planned to be used as a regular bean invocation
       // proxyFactory.addAdvice(...); - see MethodInterceptor
-      WorkflowOption workflowOption = cadenceProperties.getWorkflows().get(workflow.value());
+    WorkflowOption workflowOption = cadenceProperties.getWorkflows().get(workflow.value());
 
       Worker worker = workerFactory
           .newWorker(workflowOption.getTaskList(), getWorkerOptions(workflowOption));
