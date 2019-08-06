@@ -22,5 +22,7 @@ public class AutoConfigurationTest {
 
     factory.next().process();
 
+    factoryTwo.next().process();
+
   }
 }

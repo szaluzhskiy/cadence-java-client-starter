@@ -9,10 +9,10 @@ import com.uber.cadence.worker.Worker;
 import com.uber.cadence.worker.WorkerOptions;
 import com.uber.cadence.workflow.WorkflowMethod;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -37,6 +37,7 @@ public class WorkflowAnnotationBeanPostProcessor
   private final WorkflowClient workflowClient;
   private final CadenceProperties cadenceProperties;
   private final Worker.Factory workerFactory;
+  private final Set<String> classes = new HashSet<>();
 
   private BeanFactory beanFactory;
 
@@ -47,9 +48,10 @@ public class WorkflowAnnotationBeanPostProcessor
 
   @Override
   public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
-    /*
-     * AnnotationUtils.getRepeatableAnnotations does not look at interfaces
-     */
+    if (classes.contains(bean.getClass().getName())) {
+      return bean;
+    }
+
     Class<?> targetClass = AopUtils.getTargetClass(bean);
     Workflow workflow = AnnotationUtils.findAnnotation(targetClass, Workflow.class);
 
@@ -67,6 +69,8 @@ public class WorkflowAnnotationBeanPostProcessor
       return bean;
 
     } else {
+
+      log.info("Registering worker for {}", targetClass);
 
       // Регистрируем воркера с имплементацией
 
@@ -90,6 +94,7 @@ public class WorkflowAnnotationBeanPostProcessor
 
       ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition(workflow.value(), rootBeanDefinition);
 
+      classes.add(bean.getClass().getName());
     }
     return bean;
   }

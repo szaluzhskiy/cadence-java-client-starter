@@ -84,7 +84,8 @@
         </configuration>
         <executions>
           <execution>
-            <phase>process-classes</phase>
+            <!-- Compile and weave aspects after all classes compiled by javac -->
+            <phase>test-compile</phase>
             <goals>
               <goal>compile</goal>
               <goal>test-compile</goal>
