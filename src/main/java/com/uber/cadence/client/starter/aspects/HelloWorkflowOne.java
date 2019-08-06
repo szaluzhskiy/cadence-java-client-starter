@@ -1,11 +1,11 @@
-package com.uber.cadence.client.starter.app.workflow;
+package com.uber.cadence.client.starter.aspects;
 
 import com.uber.cadence.client.starter.annotations.Workflow;
 import com.uber.cadence.workflow.WorkflowMethod;
 
 @Workflow("one")
-public interface HelloWorkflow {
+public interface HelloWorkflowOne {
 
   @WorkflowMethod
-  void process();
+  public void process();
 }

@@ -1,4 +1,4 @@
-package com.uber.cadence.client.starter.app;
+package com.uber.cadence.client.starter.workflow;
 
 import org.springframework.stereotype.Service;
 

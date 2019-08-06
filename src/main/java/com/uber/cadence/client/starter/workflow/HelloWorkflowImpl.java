@@ -1,8 +1,6 @@
-package com.uber.cadence.client.starter.app.workflow;
+package com.uber.cadence.client.starter.workflow;
 
-import com.uber.cadence.client.starter.annotations.Workflow;
-import com.uber.cadence.client.starter.app.SimpleService;
-import lombok.RequiredArgsConstructor;
+import com.uber.cadence.client.starter.aspects.HelloWorkflowOne;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class HelloWorkflowImpl implements HelloWorkflow, TargetSource {
+public class HelloWorkflowImpl implements HelloWorkflowOne, TargetSource {
 
   @Autowired
   private SimpleService simpleService;
@@ -23,7 +21,7 @@ public class HelloWorkflowImpl implements HelloWorkflow, TargetSource {
 
   @Override
   public Class<?> getTargetClass() {
-    return HelloWorkflow.class;
+    return HelloWorkflowOne.class;
   }
 
   @Override
