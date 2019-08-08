@@ -1,7 +1,8 @@
 package com.uber.cadence.client.starter.processors;
 
 import com.uber.cadence.client.WorkflowClient;
-import com.uber.cadence.client.starter.WorkflowFactory;
+import com.uber.cadence.client.WorkflowOptions;
+import com.uber.cadence.client.WorkflowOptions.Builder;
 import com.uber.cadence.client.starter.annotations.Workflow;
 import com.uber.cadence.client.starter.config.CadenceProperties;
 import com.uber.cadence.client.starter.config.CadenceProperties.WorkflowOption;
@@ -9,6 +10,7 @@ import com.uber.cadence.worker.Worker;
 import com.uber.cadence.worker.WorkerOptions;
 import com.uber.cadence.workflow.WorkflowMethod;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +22,11 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -72,27 +74,39 @@ public class WorkflowAnnotationBeanPostProcessor
 
       log.info("Registering worker for {}", targetClass);
 
-      // Регистрируем воркера с имплементацией
+      // Регистрируем воркера с проксей от бина имплементации
 
-      WorkflowOption workflowOption = cadenceProperties.getWorkflows().get(workflow.value());
+      WorkflowOption option = cadenceProperties.getWorkflows().get(workflow.value());
 
       Worker worker = workerFactory
-          .newWorker(workflowOption.getTaskList(), getWorkerOptions(workflowOption));
+          .newWorker(option.getTaskList(), getWorkerOptions(option));
 
-      worker.registerWorkflowImplementationTypes(bean.getClass());
+      Enhancer enhancer = new Enhancer();
+      enhancer.setSuperclass(bean.getClass());
+      enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
 
-      // Добавляем в контекст фэктори с нужными тайп параметрами
+        if (methods.contains(method)) {
+          WorkflowOptions options = new Builder()
+              .setTaskList(workflow.value())
+              .setExecutionStartToCloseTimeout(
+                  Duration.ofSeconds(option.getExecutionTimeout()))
+              .build();
 
-      RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(
-          WorkflowFactory.class,
-          () -> new WorkflowFactory<>(workflowClient, workflowOption, workflow.value(), targetClass.getInterfaces()[0])
-      );
+          Object stub = workflowClient.newWorkflowStub(targetClass.getInterfaces()[0], options);
 
-      rootBeanDefinition.setTargetType(
-          ResolvableType.forClassWithGenerics(WorkflowFactory.class, targetClass.getInterfaces()[0], targetClass)
-      );
+          return stub.getClass().getMethod(method.getName()).invoke(stub, args);
+        } else {
+          return proxy.invokeSuper(obj, args);
+        }
+      });
 
-      ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition(workflow.value(), rootBeanDefinition);
+      Object o = enhancer.create();
+
+      worker.addWorkflowImplementationFactory(
+          (Class<Object>) targetClass.getInterfaces()[0],
+          () -> ((DefaultListableBeanFactory) beanFactory).configureBean(bean, beanName));
+
+      ((DefaultListableBeanFactory) beanFactory).registerSingleton(beanName, o);
 
       classes.add(bean.getClass().getName());
     }

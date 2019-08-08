@@ -7,13 +7,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.aspectj.SpringConfiguredConfiguration;
 
 /**
  * Indicates that cadence auto-configuration should be applied
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-@Import({CadenceBootstrapConfiguration.class, SpringConfiguredConfiguration.class})
+@Import(CadenceBootstrapConfiguration.class)
 public @interface EnableCadence {
 }

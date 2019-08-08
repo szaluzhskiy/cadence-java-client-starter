@@ -5,5 +5,5 @@ import com.uber.cadence.workflow.WorkflowMethod;
 public interface HelloWorkflow {
 
   @WorkflowMethod
-  void process();
+  String process();
 }

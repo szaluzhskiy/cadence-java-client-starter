@@ -10,16 +10,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @Workflow("one")
-@Configurable(autowire = Autowire.BY_TYPE, preConstruction = true)
 public class HelloWorkflowImpl implements HelloWorkflow {
 
   @Autowired
   private SimpleService simpleService;
 
   @Override
-  public void process() {
-    System.out.println(
-        "Hello from " + this.getClass() + " including " + simpleService.getClass()
-    );
+  public String process() {
+    return "Hello from " + this.getClass() + " including " + simpleService.getClass();
   }
 }

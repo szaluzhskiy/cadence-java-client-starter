@@ -1,7 +1,8 @@
 package com.uber.cadence.client.starter.app;
 
 
-import com.uber.cadence.client.starter.WorkflowFactory;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,17 +13,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = Application.class)
 public class AutoConfigurationTest {
 
+
   @Autowired
-  WorkflowFactory<HelloWorkflow, HelloWorkflowImpl> factory;
+  HelloWorkflowImpl impl;
   @Autowired
-  WorkflowFactory<HelloWorkflow, HelloWorkflowImplTwo> factoryTwo;
+  HelloWorkflowImplTwo impl2;
 
   @Test
-  public void contextLoads() {
+  public void workflowsProcessOk() {
 
-    factory.next().process();
+    assertNotNull(impl.process());
 
-    factoryTwo.next().process();
+    assertNotNull(impl2.process());
 
   }
 }
