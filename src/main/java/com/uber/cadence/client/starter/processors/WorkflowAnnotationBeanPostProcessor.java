@@ -8,6 +8,7 @@ import com.uber.cadence.client.starter.config.CadenceProperties;
 import com.uber.cadence.client.starter.config.CadenceProperties.WorkflowOption;
 import com.uber.cadence.worker.Worker;
 import com.uber.cadence.worker.WorkerOptions;
+import com.uber.cadence.worker.WorkflowImplementationOptions;
 import com.uber.cadence.workflow.WorkflowMethod;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -70,7 +71,8 @@ public class WorkflowAnnotationBeanPostProcessor
       log.info("No @WorkflowMethod found on bean {}", bean.getClass());
       return bean;
 
-    } else {
+    } else if (targetClass.getInterfaces().length == 1 && methods.size() == 1) {
+      Class<?> workflowIntefrace = targetClass.getInterfaces()[0];
 
       log.info("Registering worker for {}", targetClass);
 
@@ -92,7 +94,7 @@ public class WorkflowAnnotationBeanPostProcessor
                   Duration.ofSeconds(option.getExecutionTimeout()))
               .build();
 
-          Object stub = workflowClient.newWorkflowStub(targetClass.getInterfaces()[0], options);
+          Object stub = workflowClient.newWorkflowStub(workflowIntefrace, options);
 
           return stub.getClass().getMethod(method.getName()).invoke(stub, args);
         } else {
@@ -100,15 +102,13 @@ public class WorkflowAnnotationBeanPostProcessor
         }
       });
 
-      Object o = enhancer.create();
+      Object proxy = enhancer.create();
 
-      worker.addWorkflowImplementationFactory(
-          (Class<Object>) targetClass.getInterfaces()[0],
-          () -> ((DefaultListableBeanFactory) beanFactory).configureBean(bean, beanName));
-
-      ((DefaultListableBeanFactory) beanFactory).registerSingleton(beanName, o);
+      worker.registerWorkflowImplementationTypes(proxy.getClass());
 
       classes.add(bean.getClass().getName());
+
+      return proxy;
     }
     return bean;
   }

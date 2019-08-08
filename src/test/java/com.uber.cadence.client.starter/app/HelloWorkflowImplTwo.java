@@ -1,6 +1,7 @@
 package com.uber.cadence.client.starter.app;
 
 import com.uber.cadence.client.starter.annotations.Workflow;
+import com.uber.cadence.workflow.WorkflowMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,16 +5,16 @@ import com.uber.cadence.client.starter.annotations.EnableCadence;
 import com.uber.cadence.client.starter.processors.WorkflowAnnotationBeanPostProcessor;
 import com.uber.cadence.worker.Worker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Import;
 
 @Configuration
 @ConditionalOnClass({EnableCadence.class})
 @EnableConfigurationProperties(CadenceProperties.class)
-@Import(WorkflowAnnotationBeanPostProcessor.class)
+@Import({WorkflowAnnotationBeanPostProcessor.class})
 @RequiredArgsConstructor
 public class CadenceBootstrapConfiguration {
 
