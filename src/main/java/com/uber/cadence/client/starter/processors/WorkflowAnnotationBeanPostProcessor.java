@@ -104,7 +104,9 @@ public class WorkflowAnnotationBeanPostProcessor
 
       Object proxy = enhancer.create();
 
-      worker.registerWorkflowImplementationTypes(proxy.getClass());
+      worker.addWorkflowImplementationFactory(
+          (Class<Object>) targetClass.getInterfaces()[0],
+          () -> ((DefaultListableBeanFactory) beanFactory).configureBean(bean, beanName));
 
       classes.add(bean.getClass().getName());
 
