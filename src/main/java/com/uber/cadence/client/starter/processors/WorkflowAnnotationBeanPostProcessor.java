@@ -8,7 +8,6 @@ import com.uber.cadence.client.starter.config.CadenceProperties;
 import com.uber.cadence.client.starter.config.CadenceProperties.WorkflowOption;
 import com.uber.cadence.worker.Worker;
 import com.uber.cadence.worker.WorkerOptions;
-import com.uber.cadence.worker.WorkflowImplementationOptions;
 import com.uber.cadence.workflow.WorkflowMethod;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -78,7 +77,7 @@ public class WorkflowAnnotationBeanPostProcessor
 
       // Регистрируем воркера с проксей от бина имплементации
 
-      WorkflowOption option = cadenceProperties.getWorkflows().get(workflow.value());
+      WorkflowOption option = cadenceProperties.getWorkflows().get(workflow.taskList());
 
       Worker worker = workerFactory
           .newWorker(option.getTaskList(), getWorkerOptions(option));
@@ -89,7 +88,7 @@ public class WorkflowAnnotationBeanPostProcessor
 
         if (methods.contains(method)) {
           WorkflowOptions options = new Builder()
-              .setTaskList(workflow.value())
+              .setTaskList(workflow.taskList())
               .setExecutionStartToCloseTimeout(
                   Duration.ofSeconds(option.getExecutionTimeout()))
               .build();
@@ -107,6 +106,8 @@ public class WorkflowAnnotationBeanPostProcessor
       worker.addWorkflowImplementationFactory(
           (Class<Object>) targetClass.getInterfaces()[0],
           () -> ((DefaultListableBeanFactory) beanFactory).configureBean(bean, beanName));
+
+      ((DefaultListableBeanFactory) beanFactory).registerSingleton(beanName, bean);
 
       classes.add(bean.getClass().getName());
 

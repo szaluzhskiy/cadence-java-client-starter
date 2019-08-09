@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface Workflow {
   /**
-   * Link to workflow properties to be loaded from config
+   * Cadence task list name
    */
-  String value();
+  String taskList();
 }
