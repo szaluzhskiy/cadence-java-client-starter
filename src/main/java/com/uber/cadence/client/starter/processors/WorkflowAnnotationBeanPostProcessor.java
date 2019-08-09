@@ -107,8 +107,6 @@ public class WorkflowAnnotationBeanPostProcessor
           (Class<Object>) targetClass.getInterfaces()[0],
           () -> ((DefaultListableBeanFactory) beanFactory).configureBean(bean, beanName));
 
-      ((DefaultListableBeanFactory) beanFactory).registerSingleton(beanName, bean);
-
       classes.add(bean.getClass().getName());
 
       return proxy;
