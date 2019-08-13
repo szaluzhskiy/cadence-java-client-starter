@@ -1,5 +1,6 @@
 package com.uber.cadence.client.starter.config;
 
+import com.uber.cadence.activity.ActivityOptions;
 import java.util.Map;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,8 @@ public class CadenceProperties {
   private Boolean alwaysSave;
 
   private Map<String, WorkflowOption> workflows;
+
+  private Map<String, ActivityOptions.Builder> activities;
 
   @Data
   @NoArgsConstructor
