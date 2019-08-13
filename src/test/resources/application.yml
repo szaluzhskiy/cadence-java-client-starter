@@ -14,3 +14,6 @@ spring.cadence:
       executiontimeout: 10000
       activityPoolSize: 100
       workflowPoolSize: 50
+  activities:
+    ac:
+      scheduleToCloseTimeout: 10000
